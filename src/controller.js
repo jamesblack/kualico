@@ -44,7 +44,7 @@ export default class Controller {
   }
 
   onOpenClose(elevator, state) {
-    console.log(`Elevator ${elevator.id} is ${state ? 'closing' : 'opening'} its doors.`);
+    console.log(`Elevator ${elevator.id} is ${state ? 'opening' : 'closing'} its doors.`);
   }
 
   findElevatorForBuzz(floor) {
@@ -52,6 +52,9 @@ export default class Controller {
 
     for (var i = 0; i < this.elevators.length; i++) {
       let test = this.elevators[i];
+
+      //DO NOT USE MAITENANCE ELEVATORS
+      if (test.trips > 100) continue;
 
       //Highest priority, idle elevator on that floor
       if (test.target === null && test.floor === floor) {
