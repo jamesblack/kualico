@@ -5,13 +5,15 @@ export default class Elevator extends EventEmitter {
   constructor(id) {
     super();
     this.id = id;
-    this.instructions = [];
+    this.pickups = [];
     this.floor = 1;
+    this.target = null;
     this.door = false;
   }
 
   travel(floor) {
     // Goto a floor
+    this.target = floor;
     this.emit('travel', this, this.floor, floor);
   }
 
@@ -26,6 +28,8 @@ export default class Elevator extends EventEmitter {
 
   handle() {
     // Handle most important instruction
+
+    if (this.floor === this.target) this.target = null;
   }
 
   get status() {

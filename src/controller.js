@@ -9,6 +9,7 @@ export default class Controller {
     this.floorCount = floorCount;
     this.elevatorCount = elevatorCount;
     this.elevators = [];
+    this.queue = [];
   }
 
   init() {
@@ -32,7 +33,32 @@ export default class Controller {
   }
 
   buzz(floor) {
-    console.log(this.elevators);
-    this.elevators[0].travel(2);
+    let elevator = null;
+
+    for (var i = 0; i < this.elevators.length; i++) {
+      let test = this.elevators[i];
+
+      //Highest priority, idle elevator on that floor
+      if (test.target === null && test.floor === floor) {
+        elevator = test;
+        break;
+      }
+
+      //Medium priority, elevator that will pass floor on the way to target
+      if (floor >= Math.min(test.floor, test.target) && floor <= Math.max(test.target, test.floor)) {
+        elevator = test;
+        break;
+      }
+
+      //Lowest Priority, closest idle elevator
+      elevator = this.elevators.reduce((prev, current) => {
+        if (prev === null) return current;
+
+        if (Math.abs(floor - current.floor) < Math.abs(floor - prev.floor)) return current;
+
+        return prev;
+      }, null);
+      break;
+    }
   }
 }
