@@ -32,7 +32,7 @@ export default class Controller {
     console.log(`Elevator ${elevator.id} is ${state ? 'closing' : 'opening'} its doors.`);
   }
 
-  buzz(floor) {
+  findElevatorForBuzz(floor) {
     let elevator = null;
 
     for (var i = 0; i < this.elevators.length; i++) {
@@ -47,9 +47,11 @@ export default class Controller {
       //Medium priority, elevator that will pass floor on the way to target
       if (floor >= Math.min(test.floor, test.target) && floor <= Math.max(test.target, test.floor)) {
         elevator = test;
-        break;
+        continue;
       }
+    }
 
+    if (elevator === null) {
       //Lowest Priority, closest idle elevator
       elevator = this.elevators.reduce((prev, current) => {
         if (prev === null) return current;
@@ -58,7 +60,19 @@ export default class Controller {
 
         return prev;
       }, null);
-      break;
+    }
+
+    return elevator;
+  }
+
+  buzz(floor) {
+    let elevator = findElevatorForBuzz(floor);
+
+    if (elevator === null) {
+      // If after all of that the elevator is still null put the buzz into the queue;
+      queue.push(floor);
+    } else {
+      elevator.pickUp(floor);
     }
   }
 }
