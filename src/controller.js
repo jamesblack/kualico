@@ -1,4 +1,5 @@
 import Elevator from './elevator';
+import _ from 'lodash';
 
 /**
  * Elevator controller
@@ -14,7 +15,7 @@ export default class Controller {
 
   init() {
     for (let i = 0; i < this.elevatorCount; i++) {
-      this.elevators.push(new Elevator(i));
+      this.elevators.push(new Elevator(i, this.floorCount));
       this.elevators[i].on('travel', this.onTravel.bind(this));
       this.elevators[i].on('openClose', this.onOpenClose.bind(this));
     }
@@ -22,6 +23,20 @@ export default class Controller {
 
   operate() {
     // Tells individual elevators to handle their next operation, failing to call this would cause elevators to stop functioning. Useful in case of emergencies;
+
+    // If there is a Q, attempt to find an elevator for it every 'turn'
+    if (this.queue.length > 0) {
+      for (var i = 0; i < this.queue.length; i++) {
+        let elevator = this.findElevatorForBuzz(this.queue[i]);
+        if (elevator) {
+          elevator.pickUp(this.queue[i]);
+          _.pull(this.queue, this.queue[i]);
+        }
+      }
+    }
+
+    // Tell elevators to handle their turn
+    this.elevators.forEach((elevator) => elevator.handle());
   }
 
   onTravel(elevator, leaving, target) {
@@ -66,7 +81,7 @@ export default class Controller {
   }
 
   buzz(floor) {
-    let elevator = findElevatorForBuzz(floor);
+    let elevator = this.findElevatorForBuzz(floor);
 
     if (elevator === null) {
       // If after all of that the elevator is still null put the buzz into the queue;
